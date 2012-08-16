@@ -1,14 +1,7 @@
 package com.vorsk.audiosnap;
 
-import java.io.BufferedOutputStream;
-import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-
-import android.media.AudioFormat;
-import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -19,9 +12,8 @@ import android.util.Log;
  * 
  * @author Ian Foster
  */
-class Recorder extends AsyncTask<RecordActivity, String, File> {
+class Recorder extends AsyncTask<Integer, String, File> {
 	private final String TAG = "AudioRecord";
-	private final int FREQUENCY = 11025;
 	private long startTime;
 
 	// Gui Var, there should be a better way to do this
@@ -29,6 +21,11 @@ class Recorder extends AsyncTask<RecordActivity, String, File> {
 
 	// boolean value used to stop the recording if the activity is closed
 	private boolean isRecording = true;
+	
+	//constructor to set the activity
+	public Recorder(RecordActivity activity){
+		this.activity = activity;
+	}
 
 	/*
 	 * (non-Javadoc) Main thread method Listens to the audio input and passes
@@ -37,15 +34,8 @@ class Recorder extends AsyncTask<RecordActivity, String, File> {
 	 * @see android.os.AsyncTask#doInBackground(Params[])
 	 */
 	@Override
-	protected File doInBackground(RecordActivity... a) {
-		// kinda ctor-ish, there must be another way of doing this
-		activity = a[0]; // TODO find a better way!!!
-
+	protected File doInBackground(Integer... a) {
 		Log.d(TAG, "Thread started");
-
-		// configure stuff
-		int channelConfiguration = AudioFormat.CHANNEL_CONFIGURATION_MONO;
-		int audioEncoding = AudioFormat.ENCODING_PCM_16BIT;
 
 		File temp;
 		try {
@@ -55,59 +45,42 @@ class Recorder extends AsyncTask<RecordActivity, String, File> {
 		}
 
 		try {
-			// Create a DataOuputStream to write the audio data into the saved
-			// file.
-			OutputStream os = new FileOutputStream(temp);
-			BufferedOutputStream bos = new BufferedOutputStream(os);
-			DataOutputStream dos = new DataOutputStream(bos);
+			MediaRecorder recorder = new MediaRecorder();
+			recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+			recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+			recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+			recorder.setMaxFileSize(10485760); //10MB
+			recorder.setOutputFile(temp.getPath());
 
-			// Create a new AudioRecord object to record the audio.
-			int bufferSize = AudioRecord.getMinBufferSize(FREQUENCY,
-					channelConfiguration, audioEncoding);
-			AudioRecord audioRecord = new AudioRecord(
-					MediaRecorder.AudioSource.MIC, FREQUENCY,
-					channelConfiguration, audioEncoding, bufferSize);
-
-			short[] buffer = new short[bufferSize];
+			//TODO: the above should be moved to the ctor
+			recorder.prepare();
+			recorder.start();
 			startTime = (System.currentTimeMillis()/1000);
-			audioRecord.startRecording();
 
 			while (isRecording) {
-				int bufferReadResult = audioRecord.read(buffer, 0, bufferSize);
-				for (int i = 0; i < bufferReadResult; i++)
-					dos.writeShort(buffer[i]);
-				//too much?
+				Thread.sleep(500);
 				publishProgress();
 			}
 
-			audioRecord.stop();
-			dos.close();
+			recorder.stop();
 
 		} catch (Throwable t) {
 			Log.e(TAG, "Recording Failed");
 		}
-		
-		//buffer error here
-		//this.play(temp);
 
 		return temp;
 	}
 	
 	protected void onPostExecute(final File result) {
 		activity.uploadFinished(result);
-
 	}
 	
 
 	/*
-	 * (non-Javadoc) Push a string to the GUI to display
-	 * 
 	 * @see android.os.AsyncTask#onProgressUpdate(Progress[])
 	 */
 	@Override
-	protected void onProgressUpdate(String... s) {
-		// Log.d(TAG, "GUI: "+s[0]);
-		// activity.addToGUI(s[0]);
+	protected void onProgressUpdate(String... s) {;
 		long diff = (System.currentTimeMillis()/1000)-startTime;
 		activity.updateTime(String.format("%d:%02d", (diff/60), (diff%60)));
 	}

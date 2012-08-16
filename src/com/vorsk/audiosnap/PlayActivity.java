@@ -64,22 +64,18 @@ public class PlayActivity extends Activity {
     	Log.v(TAG,"State Toggle");
     	Button button = (Button) findViewById(R.id.play_button);
 		if (!playing){
-			//donload the file to play
+			//download the file to play
 			if (myFile == null){
 				Log.d(TAG, "file does not exist, downloading");
 				myFile = downloadFile(file);
 			}
 			
-			
 			playThread = new Player(this);
 			button.setText(R.string.stop);
 			playThread.execute(myFile);
-			//recordThread.execute(this);
 		}else{
 			button.setText(R.string.play);
 			playThread.stop();
-			//recordThread.cancel(false);
-			//recordThread = null;
 		}
 		playing = !playing;
     }
@@ -92,12 +88,12 @@ public class PlayActivity extends Activity {
     	ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
     	try {
-		   DropboxFileInfo info = AudioSnapActivity.mApi.getFile(fileName, null, outputStream, null);
-		   Log.i("DbExampleLog", "The file's rev is: " + info.getMetadata().rev);
+    		DropboxFileInfo info = AudioSnapActivity.mApi.getFile(fileName, null, outputStream, null);
+    		Log.i("DbExampleLog", "The file's rev is: " + info.getMetadata().rev);
 		} catch (DropboxException e) {
 			showToast("Something went wrong while downloading");
-		   Log.e("DbExampleLog", "Something went wrong while downloading.");
-		   finish();
+			Log.e("DbExampleLog", "Something went wrong while downloading.");
+			finish();
 		}
     	    	
     	//return temp;

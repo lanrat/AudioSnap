@@ -34,6 +34,7 @@ import android.widget.Toast;
 
 public class AudioSnapActivity extends ListActivity {
 	private static final String TAG = "AudioSnap";
+	public static final String EXT = ".mp4";
 	
 	//DB stuff
 	final static private String APP_KEY = "f4nj12exvbn6qcw";

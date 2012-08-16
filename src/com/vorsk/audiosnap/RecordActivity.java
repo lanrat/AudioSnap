@@ -87,7 +87,7 @@ public class RecordActivity extends Activity {
 		}
 
 		try {
-		   Entry newEntry = AudioSnapActivity.mApi.putFile(fileName.getText().toString(), inputStream,
+		   Entry newEntry = AudioSnapActivity.mApi.putFile(fileName.getText().toString()+AudioSnapActivity.EXT, inputStream,
 		           file.length(), null, null);//new DBProgress(dialog));
 		   Log.i("DbExampleLog", "The uploaded file's rev is: " + newEntry.rev);
 		   //showToast("Upload Finished");
@@ -101,20 +101,10 @@ public class RecordActivity extends Activity {
 		}
 		//end db upload code
 		
-		//Log.d(TAG,"dismissing");
-		//dialog.dismiss();
-		finish();
+		//delete the temp file
+		file.delete();
 		
-		/*
-    	//save the file
-    	FileMover mover = new FileMover();
-    	mover.activity = this;
-    	mover.mDBApi = AudioSnapActivity.mApi;
-    	mover.file = file;
-    	mover.uploadName = fileName.getText().toString();
-    	mover.execute(FileMover.Action.UPLOAD);
-    	finish();*/
-    	
+		finish();
 	}
 	
 	
@@ -123,18 +113,12 @@ public class RecordActivity extends Activity {
     	Button button = (Button) findViewById(R.id.record_button);
 		fileName.setEnabled(!recording);
 		if (recording){
-			recordThread = new Recorder();
+			recordThread = new Recorder(this);
 			button.setText(R.string.stop_recording);
-			recordThread.execute(this);
+			recordThread.execute(0);
 		}else{
 			button.setText(R.string.start_recording);
 			recordThread.stop();
-			
-			
-			//save and upload the file
-			
-			//recordThread.cancel(false);
-			//recordThread = null;
 		}
     }
     

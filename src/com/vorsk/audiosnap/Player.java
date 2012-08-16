@@ -6,6 +6,7 @@ import java.io.DataInputStream;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
+import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -17,7 +18,6 @@ import android.util.Log;
  */
 class Player extends AsyncTask<ByteArrayOutputStream, String, Integer> {
 	private final String TAG = "player";
-	private final int FREQUENCY = 11025;
 	private long startTime;
 
 	// Gui Var, there should be a better way to do this
@@ -33,43 +33,15 @@ class Player extends AsyncTask<ByteArrayOutputStream, String, Integer> {
 
 
 	protected Integer doInBackground(ByteArrayOutputStream... f) {
-		// kinda ctor-ish, there must be another way of doing this
 		Log.d(TAG, "Thread started");
 		
 		//buffer shits
-		DataInputStream dis = new DataInputStream(new ByteArrayInputStream(((ByteArrayOutputStream) f[0]).toByteArray()));
-
-		startTime = (System.currentTimeMillis()/1000);
+		//DataInputStream dis = new DataInputStream(new ByteArrayInputStream(((ByteArrayOutputStream) f[0]).toByteArray()));
 		
-		// Get the length of the audio stored in the file (16 bit so 2 bytes per
-		// short)
-		// and create a short array to store the recorded audio.
-		//int musicLength = (int) (dis. / 2);
-		//ArrayList<Short> music = new ArrayList<Short>();
-		
-		//Log.v(TAG,"buffer size of: "+musicLength);
+		MediaPlayer player = new MediaPlayer();
 
 		try {
-			// Create a DataInputStream to read the audio data back from the
-			// saved file.
-			//InputStream is = new FileInputStream(temp);
-			//BufferedInputStream bis = new BufferedInputStream(is);
-			//DataInputStream dis = new DataInputStream(new PipedInputStream(f[0]));
-			// Read the file into the music array.
-			/*int i = 0;
-			while (dis.available() > 0 && isPlaying) {
-				music.add(dis.readShort());
-				i++;
-			}*/
-
-			// Close the input streams.
-			//dis.close();
-
-			// Create a new AudioTrack object using the same parameters as the
-			// AudioRecord
-			// object used to create the file.
-			
-			int minBuffSize = AudioTrack.getMinBufferSize(FREQUENCY, AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT);
+			/*int minBuffSize = AudioTrack.getMinBufferSize(FREQUENCY, AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT);
 			
 			
 			AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
@@ -81,7 +53,9 @@ class Player extends AsyncTask<ByteArrayOutputStream, String, Integer> {
 
 			// Write the music buffer to the AudioTrack object
 			//audioTrack.write((short[])music.toArray(new Short[0]), 0, (music.size()/2));
-			short[] data;
+			short[] data;*/
+			
+			startTime = (System.currentTimeMillis()/1000);
 			
 			while(isPlaying && dis.available() > 0){
 				data = new short[512];

@@ -44,7 +44,13 @@ public class DBFileArrayAdapter extends ArrayAdapter<Entry>{
 		
 		TextView textView = (TextView) rowView.findViewById(R.id.name);
 		//an array would be faster, but I'm gona use a list....
-		textView.setText(values.get(position).fileName()); //set the text
+		String filename = values.get(position).fileName();
+		int offset = filename.lastIndexOf(AudioSnapActivity.EXT);
+		if (offset != -1){
+			//remove the ext
+			filename = filename.substring(0, offset);
+		}
+		textView.setText(filename); //set the text
 
 		return rowView;
 	}
