@@ -39,6 +39,7 @@ class Player extends AsyncTask<ByteArrayOutputStream, String, Integer> {
 		//DataInputStream dis = new DataInputStream(new ByteArrayInputStream(((ByteArrayOutputStream) f[0]).toByteArray()));
 		
 		MediaPlayer player = new MediaPlayer();
+		player.setDataSource(path);
 
 		try {
 			/*int minBuffSize = AudioTrack.getMinBufferSize(FREQUENCY, AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT);

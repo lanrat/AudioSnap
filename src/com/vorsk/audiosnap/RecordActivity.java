@@ -69,12 +69,6 @@ public class RecordActivity extends Activity {
 	}
 	
 	protected void upload(File file){
-		/*ProgressDialog dialog = new ProgressDialog(this);
-		dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-		dialog.setMessage("Uploading...");
-		dialog.setCancelable(false);
-		dialog.setProgress(0);
-		dialog.show();*/
 		showToast("Uploading in the background");
 		
 		//start DB upload code
