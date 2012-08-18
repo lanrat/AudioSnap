@@ -10,6 +10,9 @@ import com.dropbox.client2.DropboxAPI.DropboxFileInfo;
 import com.dropbox.client2.exception.DropboxException;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -21,9 +24,10 @@ public class PlayActivity extends Activity {
 	private static final String TAG = "Play Activity";
 	boolean playing = false;
 	Player playThread = null;
+	protected ProgressDialog pd;
 	
-	File myFile;
-	String file;
+	protected File myFile;
+	protected String file;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -70,15 +74,18 @@ public class PlayActivity extends Activity {
     	Button button = (Button) findViewById(R.id.play_button);
 		if (!playing){
 			//download the file to play
+	    	startLoadingScreen();
 			if (myFile == null){
 				Log.d(TAG, "file does not exist, downloading");
 				myFile = downloadFile(file);
 			}
 			if (myFile == null){
+    	    	stopLoadingScreen();
 				return;
 			}
 			playThread = new Player(this);
 			button.setText(R.string.stop);
+	    	stopLoadingScreen();
 			playThread.execute(myFile);
 		}else{
 			button.setText(R.string.play);
@@ -109,7 +116,7 @@ public class PlayActivity extends Activity {
 			showToast("Something went wrong while downloading");
 			Log.e(TAG, "could not create temp file");
 		}
-    	    	
+
     	return temp;	
 	}
     
@@ -122,5 +129,22 @@ public class PlayActivity extends Activity {
 		((TextView) findViewById(R.id.running_time)).setText(time);
 	}
 	
+	//protected void startLoadingScreen(final AsyncTask task){
+	protected void startLoadingScreen(){
+		 pd = ProgressDialog.show(this, "Loading...", "Retrieving Workouts", true, true,
+				 new DialogInterface.OnCancelListener(){
+            public void onCancel(DialogInterface dialog) {
+                //task.cancel(true);
+                //finish();
+            }
+        }
+		);
+	}
+
+	protected void stopLoadingScreen(){
+		if (pd != null){
+			pd.dismiss();
+		}
+	}
 	
 }

@@ -12,6 +12,7 @@ import com.dropbox.client2.exception.DropboxUnlinkedException;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
@@ -27,6 +28,7 @@ public class RecordActivity extends Activity {
 	EditText fileName = null;
 	boolean recording = false;
 	Recorder recordThread = null;
+	protected ProgressDialog pd;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -56,8 +58,10 @@ public class RecordActivity extends Activity {
         .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
             	//dialog.cancel();
+            	startLoadingScreen();
                 upload(file); //TODO this does not work right, fixing later
                 //finish();
+                stopLoadingScreen();
             }
         })
         .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
@@ -133,5 +137,22 @@ public class RecordActivity extends Activity {
         error.show();
     }
     
+	//protected void startLoadingScreen(final AsyncTask task){
+	protected void startLoadingScreen(){
+		 pd = ProgressDialog.show(this, "Loading...", "Retrieving Workouts", true, true,
+				 new DialogInterface.OnCancelListener(){
+            public void onCancel(DialogInterface dialog) {
+                //task.cancel(true);
+                //finish();
+            }
+        }
+		);
+	}
+
+	protected void stopLoadingScreen(){
+		if (pd != null){
+			pd.dismiss();
+		}
+	}
 
 }
