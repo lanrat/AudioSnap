@@ -1,6 +1,11 @@
 package com.vorsk.audiosnap;
 
-import java.io.ByteArrayOutputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 import com.dropbox.client2.DropboxAPI.DropboxFileInfo;
 import com.dropbox.client2.exception.DropboxException;
 
@@ -17,7 +22,7 @@ public class PlayActivity extends Activity {
 	boolean playing = false;
 	Player playThread = null;
 	
-	ByteArrayOutputStream myFile;
+	File myFile;
 	String file;
 	
 	@Override
@@ -56,7 +61,7 @@ public class PlayActivity extends Activity {
 		if (playing){
 			playThread.stop();
 		}
-		
+		myFile.delete();
 	}
 
 	
@@ -69,7 +74,9 @@ public class PlayActivity extends Activity {
 				Log.d(TAG, "file does not exist, downloading");
 				myFile = downloadFile(file);
 			}
-			
+			if (myFile == null){
+				return;
+			}
 			playThread = new Player(this);
 			button.setText(R.string.stop);
 			playThread.execute(myFile);
@@ -80,25 +87,30 @@ public class PlayActivity extends Activity {
 		playing = !playing;
     }
     
-    private ByteArrayOutputStream downloadFile(String fileName) {
+    private File downloadFile(String fileName) {
     	//ProgressDialog dialog = ProgressDialog.show(this, "",  "Loading. Please wait...", true);
     	showToast("Downloading Audio");
     	
-    	
-    	ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    	File temp = null;
 
     	try {
-    		DropboxFileInfo info = AudioSnapActivity.mApi.getFile(fileName, null, outputStream, null);
-    		Log.i("DbExampleLog", "The file's rev is: " + info.getMetadata().rev);
+    		temp = File.createTempFile("audiosnap", "dat", getCacheDir());
+    		BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(temp));
+    		DropboxFileInfo info = AudioSnapActivity.mApi.getFile(fileName, null, out, null);
+    		Log.i(TAG, "The file's rev is: " + info.getMetadata().rev);
 		} catch (DropboxException e) {
 			showToast("Something went wrong while downloading");
-			Log.e("DbExampleLog", "Something went wrong while downloading.");
+			Log.e(TAG, "Something went wrong while downloading.");
 			finish();
+		} catch (FileNotFoundException e) {
+			showToast("Something went wrong while downloading");
+			Log.e(TAG, "could not find temp file");
+		} catch (IOException e) {
+			showToast("Something went wrong while downloading");
+			Log.e(TAG, "could not create temp file");
 		}
     	    	
-    	//return temp;
-    	return outputStream;
-    	
+    	return temp;	
 	}
     
     public void showToast(String msg) {

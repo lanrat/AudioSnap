@@ -58,7 +58,7 @@ class Recorder extends AsyncTask<Integer, String, File> {
 			startTime = (System.currentTimeMillis()/1000);
 
 			while (isRecording) {
-				Thread.sleep(500);
+				Thread.sleep(100);
 				publishProgress();
 			}
 

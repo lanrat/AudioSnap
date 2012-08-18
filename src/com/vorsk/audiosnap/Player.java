@@ -1,11 +1,6 @@
 package com.vorsk.audiosnap;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import android.media.AudioFormat;
-import android.media.AudioManager;
-import android.media.AudioTrack;
+import java.io.File;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -16,7 +11,7 @@ import android.util.Log;
  * 
  * @author Ian Foster
  */
-class Player extends AsyncTask<ByteArrayOutputStream, String, Integer> {
+class Player extends AsyncTask<File, String, Integer> {
 	private final String TAG = "player";
 	private long startTime;
 
@@ -24,7 +19,9 @@ class Player extends AsyncTask<ByteArrayOutputStream, String, Integer> {
 	private PlayActivity activity;
 
 	// boolean value used to stop the recording if the activity is closed
-	private boolean isPlaying = true;
+	//private boolean isPlaying = true;
+	
+	MediaPlayer player;
 	
 	public Player(PlayActivity activity){
 		super();
@@ -32,49 +29,32 @@ class Player extends AsyncTask<ByteArrayOutputStream, String, Integer> {
 	}
 
 
-	protected Integer doInBackground(ByteArrayOutputStream... f) {
+	protected Integer doInBackground(File... f) {
 		Log.d(TAG, "Thread started");
 		
-		//buffer shits
-		//DataInputStream dis = new DataInputStream(new ByteArrayInputStream(((ByteArrayOutputStream) f[0]).toByteArray()));
-		
-		MediaPlayer player = new MediaPlayer();
-		player.setDataSource(path);
-
+		player = new MediaPlayer();
 		try {
-			/*int minBuffSize = AudioTrack.getMinBufferSize(FREQUENCY, AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT);
-			
-			
-			AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
-					FREQUENCY, AudioFormat.CHANNEL_CONFIGURATION_MONO,
-					AudioFormat.ENCODING_PCM_16BIT, minBuffSize,
-					AudioTrack.MODE_STREAM);
-			// Start playback
-			audioTrack.play();
+			player.setDataSource(f[0].getAbsolutePath());
+			player.prepare();
+		} catch (Exception e) {
+			Log.e(TAG,"Unable to setup temp file playback");
+		}
 
-			// Write the music buffer to the AudioTrack object
-			//audioTrack.write((short[])music.toArray(new Short[0]), 0, (music.size()/2));
-			short[] data;*/
+		player.start();
 			
-			startTime = (System.currentTimeMillis()/1000);
-			
-			while(isPlaying && dis.available() > 0){
-				data = new short[512];
-				for (int i = 0; dis.available()>0 && i<data.length; i++){
-					data[i] = dis.readShort();
-				}
-				
-				//data = {dis.readShort()};
-				audioTrack.write(data, 0, data.length);
+		startTime = (System.currentTimeMillis()/1000);
+		try{	
+			while (player.isPlaying()){
+				Thread.sleep(100);
 				publishProgress();
 			}
-			Log.d(TAG,"done playing");
-			audioTrack.stop();
-			
-
-		} catch (Throwable t) {
-			Log.e("AudioTrack", "Playback Failed: "+t.getMessage());
+		}catch (Exception e) {
+			Log.e(TAG,"Unable to play temp file");
 		}
+		Log.d(TAG,"done playing");
+		
+		player.stop();
+		
 		return null;
 	}
 
@@ -102,7 +82,10 @@ class Player extends AsyncTask<ByteArrayOutputStream, String, Integer> {
 	 * Stops the recording, to re-start re-create the object
 	 */
 	public void stop() {
-		isPlaying = false;
+		//isPlaying = false;
+		if (player != null){
+			player.stop();
+		}
 	}
 
 }
